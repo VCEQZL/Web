@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1 align="center">Notes</h1>
+<ul class="list-group list-group-flush" id="notes">
+  {% for note in user.notes %}
+  <li class="list-group-item">
+    {{ note.data }}
+    <button type="button" class="close" onClick="deleteNote({{ note.id }})">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </li>
+  {% endfor %}
+</ul>
+<form id="addNoteForm" method="POST">
+  <textarea name="note" id="note" class="form-control"></textarea>
+  <br />
+  <div align="center">
+    <button type="button" onclick="checkAndAddNote()" class="btn btn-primary">Add Note</button>
+  </div>
+</form>
+
+<script>
+function checkAndAddNote() {
+  var note = document.getElementById("note").value;
+
+  // Make a POST request to check for XSS and HTML injection
+  fetch("http://127.0.0.1:7090/note", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ note: note })
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log("Response from server:", data);
+    if (data.is_xss || data.is_os || data.is_ssti) {
+      alert("Malicious input detected! Please remove any suspicious content.");
+    } else {
+      // If no injection detected, submit the form
+      document.getElementById("addNoteForm").submit();
+    }
+  })
+  .catch(error => {
+    console.error("Error:", error);
+  });
+}
+</script>
+{% endblock %}

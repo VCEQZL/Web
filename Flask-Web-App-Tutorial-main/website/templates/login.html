@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<form id="loginForm" method="POST">
+  <h3 align="center">Login</h3>
+  <div class="form-group">
+    <label for="first_name">Username</label>
+    <input
+      type="text"
+      class="form-control"
+      id="first_name"
+      name="first_name"
+      placeholder="Enter Username"
+    />
+  </div>
+  <div class="form-group">
+    <label for="password">Password</label>
+    <input
+      type="password"
+      class="form-control"
+      id="password"
+      name="password"
+      placeholder="Enter password"
+    />
+  </div>
+  <br />
+  <button type="button" id="loginButton" class="btn btn-primary">Login</button>
+</form>
+ 
+<script>
+document.getElementById("loginButton").addEventListener("click", function() {
+  var username = document.getElementById("first_name").value;
+  var password = document.getElementById("password").value;
+ 
+  fetch('http://52.172.136.225:4090/sql injection', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({username: username, password: password})
+  }).then(response => response.json())
+  .then(data => {
+    if (data.username_is_sql_injection && data.password_is_sql_injection) {
+      alert('SQL Injection detected in both username and password!');
+    } else if (data.username_is_sql_injection) {
+      alert('SQL Injection detected in username!');
+    } else if (data.password_is_sql_injection) {
+      alert('SQL Injection detected in password!');
+    }else {
+      document.getElementById("loginForm").submit();
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+});
+</script>
+{% endblock %}
